@@ -7,9 +7,9 @@ use App\User;
 
 class Purchase extends Model
 {
-    public function inventory()
+    public function batches()
     {
-        return $this->hasMany(Inventory::class);
+        return $this->hasMany(Batch::class);
     }
 
     public function log()

@@ -48,9 +48,9 @@
 							</div>
 							<div class="col-sm-6">
 								<dl class="row">
-									<dt class="col-3">PO</dt>
+									<dt class="col-3">Batch</dt>
 									<dd class="col-9">
-										{!! $item->purchase == null ? '<em class="c-999">Null</em>' : $item->purchase->title !!}
+										{!! $item->batch == null ? '<em class="c-999">Null</em>' : $item->batch->batch_no !!}
 									</dd>
 
 									<dt class="col-3">Tasks</dt>

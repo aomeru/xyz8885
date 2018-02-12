@@ -32,8 +32,8 @@ class Inventory extends Model
         return $this->hasMany(Ilog::class);
     }
 
-    public function purchase()
+    public function batch()
     {
-        return $this->belongsTo(Purchase::class);
+        return $this->belongsTo(Batch::class);
     }
 }

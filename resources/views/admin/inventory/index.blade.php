@@ -79,15 +79,16 @@
 
 				<div class="table-responsive">
 
-					<table id="inv-table" class="data-table table table-striped table-bordered table-hover nowrapp" width="100%" data-page-length="10">
+					<table id="inv-table" class="data-table table table-striped table-bordered table-hover nowrapp" width="100%" data-page-length="50">
 
 						<thead>
 							<tr class="active">
 								<th>#</th>
+								<th>Serial No</th>
 								<th>Title</th>
 								<th>Type</th>
 								<th>Processor</th>
-								<th>PO</th>
+								<th>Batch</th>
 								<th class="text-center">Allocated</th>
 								@if(in_array(Auth::user()->username,$delete_allow))
 									<th>Added by</th>
@@ -103,9 +104,14 @@
 
 						<tbody>
 
+							@php $row_count = 1 @endphp
+
 							@foreach($invs as $item)
 
-								<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-purchase-title="{{$item->purchase == null ? '' : $item->purchase->title}}" data-item-type="{{$item->item->title}}" data-serial-no="{{$item->serial_no}}">
+								<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-batch-no="{{$item->purchase == null ? '' : $item->purchase->title}}" data-item-type="{{$item->item->title}}" data-serial-no="{{$item->serial_no}}">
+									
+									<td>{{ $row_count }}</td>
+
 									<td>
 										<u><a href="{{route('admin.inv.show', Crypt::encrypt($item->id))}}" class="c-06f">{{ $item->serial_no }}</a></u>
 									</td>
@@ -128,6 +134,8 @@
 									@endif
 
 								</tr>
+
+								@php $row_count++ @endphp
 
 							@endforeach
 
@@ -179,12 +187,12 @@
 							</div>
 
 							<div class="form-group input_field_sections">
-								<label for="purchase-title" class="form-control-label text-center sr-only">Purchase Order</label>
+								<label for="batch-no" class="form-control-label text-center sr-only">Batch Number</label>
 
-								<select id="purchase-title" class="form-control chzn-select">
-									<option value="">Select Purchase Order</option>
-									@foreach($po as $p)
-										<option value="{{$p->title}}">{{$p->title}}</option>
+								<select id="batch-no" class="form-control chzn-select">
+									<option value="">Select Batch Number</option>
+									@foreach($batches as $b)
+										<option value="{{$b->batch_no}}">{{$p->batch_no}}</option>
 									@endforeach
 								</select>
 							</div>
@@ -237,12 +245,12 @@
 							</div>
 
 							<div class="form-group input_field_sections">
-								<label for="purchase-title-edit" class="form-control-label text-center sr-only">Purchase Order</label>
+								<label for="batch-no-edit" class="form-control-label text-center sr-only">Batch Number</label>
 
-								<select id="purchase-title-edit" class="form-control chzn-selectt">
+								<select id="batch-no-edit" class="form-control chzn-selectt">
 									<option value="">None</option>
-									@foreach($po as $p)
-										<option value="{{$p->title}}">{{$p->title}}</option>
+									@foreach($batches as $b)
+										<option value="{{$b->batch_no}}">{{$p->batch_no}}</option>
 									@endforeach
 								</select>
 							</div>
@@ -370,7 +378,7 @@
 				btn_text = btn.html(),
 				serial_no = $("#serial-no").val(),
 				item_type = $("#item-type").val(),
-				po_title = $("#purchase-title").val(),
+				batch_no = $("#batch-no").val(),
 				token ='{{ Session::token() }}',
 				url = "{{route('admin.inv.add')}}";
 
@@ -380,7 +388,7 @@
 				data: {
 					serial_no: serial_no,
 					item_type: item_type,
-					po_title: po_title,
+					batch_no: batch_no,
 					_token: token
 				},
 				beforeSend: function () {
@@ -406,13 +414,13 @@
 				tr = btn.closest('tr'),
 				serial_no = tr.data('serial-no'),
 				item_type = tr.data('item-type'),
-				po_title = tr.data('purchase-title'),
+				batch_no = tr.data('batch-no'),
 				hrid = tr.data('hrid'),
 				inv_id = tr.data('id');
 
 			$("#serial-no-edit").val(serial_no);
 			$("#item-type-edit").val(item_type);
-			$("#purchase-title-edit").val(po_title);
+			$("#batch-no-edit").val(batch_no);
 			$("#inv-id-edit").val(inv_id);
 			$("#inv-row-id").val(hrid);
 
@@ -426,7 +434,7 @@
 				btn_text = btn.html(),
 				serial_no = $("#serial-no-edit").val(),
 				item_type = $("#item-type-edit").val(),
-				po_title = $("#purchase-title-edit").val(),
+				batch_no = $("#batch-no-edit").val(),
 				inv_id = $("#inv-id-edit").val(),
 				load_element = "#row-" + $("#inv-row-id").val(),
 				token ='{{ Session::token() }}',
@@ -438,7 +446,7 @@
 				data: {
 					serial_no: serial_no,
 					item_type: item_type,
-					po_title: po_title,
+					batch_no: batch_no,
 					inv_id: inv_id,
 					_token: token
 				},
@@ -451,7 +459,7 @@
 					$('#edit-inv-modal').modal('hide');
 					$(load_element).data('serial-no',serial_no);
 					$(load_element).data('item-type',item_type);
-					$(load_element).data('purchase-title',po_title);
+					$(load_element).data('batch-no',batch_no);
 					$(load_element).load(location.href + " "+ load_element +">*","");
 				},
 				error: function(jqXHR, exception){

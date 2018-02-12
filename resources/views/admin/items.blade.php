@@ -46,7 +46,7 @@
 								<th>Title</th>
 								<th>Type</th>
 								<th>Processor</th>
-								<th>Descrip</th>
+								<th>Description</th>
 								<th class="text-center">Total</th>
 								<th class="text-center" title="Allocated / Available">Al/Av</th>
 								<th class="text-center" title="Reorder?">Reorder</th>

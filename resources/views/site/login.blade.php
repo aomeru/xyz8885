@@ -13,7 +13,7 @@
 
 					<div class="row hidden-xs mb20">
 						<div class="col-xs-6 col-xs-offset-3">
-							<img src="{{asset('images/brand-name-w.png')}}" class="img-responsive center-block" alt="">
+							<img src="{{asset('images/brand-name-540x170-w.png')}}" class="img-responsive center-block" alt="">
 						</div>
 					</div>
 

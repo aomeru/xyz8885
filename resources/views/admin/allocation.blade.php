@@ -69,7 +69,9 @@
 
 									<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-serial-no="{{$item->inventory->serial_no}}" data-email="{{$item->user->email}}">
 										<td>{{ $row_count }}</td>
-										<td>{{ $item->inventory->serial_no }}</td>
+										<td>
+											<u><a href="{{route('admin.inv.show', Crypt::encrypt($item->inventory->id))}}" class="c-06f">{{ $item->inventory->serial_no }}</a></u>
+										</td>
 										<td>{{ $item->inventory->item->title }}</td>
 										<td><u><a href="{{route('admin.users.show', Crypt::encrypt($item->user->id))}}" class="c-06f">{{ $item->user->firstname.' '.$item->user->lastname }}</a></u></td>
 										<td>

@@ -85,6 +85,7 @@
 								<th class="text-center" title="Purchase Order">PO</th>
 								<th class="text-center" title="Purchase Delivery Note">DN</th>
 								<th class="text-center" title="Purchase Invoice">IN</th>
+								<th class="text-center">Batches</th>
 								<th>Added By</th>
 								<th>Total</th>
 								<th>Created</th>
@@ -111,6 +112,8 @@
 									<td class="text-center">{!! $item->dn == null ? '<em class="c-999">Null</em>' : '<a href="'.asset('storage/purchase/'.$item->dn).'" title="View '.$item->title.' delivery note" target="_blank"><i class="fa fa-2x fa-file-image-o c-900"></i></a>' !!}</td>
 									
 									<td class="text-center">{!! $item->inv == null ? '<em class="c-999">Null</em>' : '<a href="'.asset('storage/purchase/'.$item->inv).'" title="View '.$item->title.' invoice" target="_blank"><i class="fa fa-2x fa-file-image-o c-900"></i></a>' !!}</td>
+
+									<td>{!! $item->batches == null ? '<em class="c-999">Null</em>' : $item->batches->count() !!}</td>
 
 									<td><u><a href="{{route('admin.users.show', Crypt::encrypt($item->user_id))}}" class="c-06f">{{$item->user->firstname.' '.$item->user->lastname}}</a></u></td>
 

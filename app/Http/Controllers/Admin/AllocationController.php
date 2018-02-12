@@ -62,7 +62,7 @@ class AllocationController extends Controller
 			return response()->json(array('success' => false, 'errors' => ['errors' => ['WARNING!!! YOU DO NOT HAVE ACCESS TO CARRY OUT THIS PROCESS']]), 400);
 		}
 
-        if ($r->hasFile('approval')) return response()->json(array('success' => false, 'errors' => ['errors' => ['Has File']]), 400); else return response()->json(array('success' => false, 'errors' => ['errors' => ['No File '.$r->approval]]), 400);
+        //if ($r->hasFile('approval')) return response()->json(array('success' => false, 'errors' => ['errors' => ['Has File']]), 400); else return response()->json(array('success' => false, 'errors' => ['errors' => ['No File '.$r->approval]]), 400);
 
 
 		$rules = array(

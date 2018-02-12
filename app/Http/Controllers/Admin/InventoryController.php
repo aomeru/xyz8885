@@ -12,6 +12,7 @@ use App\Models\Item;
 use App\Models\Inventory;
 use App\Models\Ilog;
 use App\Models\Purchase;
+use App\Models\Batch;
 use Session;
 use Crypt;
 use Illuminate\Support\Facades\Validator;
@@ -58,7 +59,7 @@ class InventoryController extends Controller
         return view('admin.inventory.index', [
             'invs' => Inventory::orderby('serial_no')->get(),
             'items' => Item::orderby('title')->get(),
-            'po' => Purchase::orderby('title')->get(),
+            'batches' => Batch::orderby('batch_no')->get(),
             'nav' => 'inventory',
             'create_allow' => $this->create_allow,
             'edit_allow' => $this->edit_allow,
@@ -78,10 +79,10 @@ class InventoryController extends Controller
 			return response()->json(array('success' => false, 'errors' => ['errors' => ['WARNING!!! YOU DO NOT HAVE ACCESS TO CARRY OUT THIS PROCESS']]), 400);
 		}
 
-		if($r->po_title != null)
+		if($r->batch_no != null)
 		{
-			$po = Purchase::where('title',$r->po_title)->first();
-			if($po == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This purchase order does not exist.']]), 400);
+			$ba = Batch::where('batch_no',$r->batch_no)->first();
+			if($ba == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This batch item does not exist.']]), 400);
 		}
 
 		$rules = array(
@@ -99,7 +100,7 @@ class InventoryController extends Controller
 		$item = new Inventory();
 		$item->serial_no = strtoupper($r->serial_no);
 		$item->item_id = Item::where('title',$r->item_type)->value('id');
-		if($r->po_title != null) $item->purchase_id = $po->id;
+		if($r->batch_no != null) $item->batch_id = $ba->id;
 		$item->user_id = Auth::user()->id;
 
 		if($item->save()) { $this->log(Auth::user()->id, 'Added inventory with serial number "'.$item->serial_no.'" and id .'.$item->id, $r->path()); return response()->json(array('success' => true, 'message' => 'Inventory Added'), 200);}
@@ -121,10 +122,10 @@ class InventoryController extends Controller
 
 		if($item == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This item was not found in our inventory.']]), 400);
 
-		if($r->po_title != null)
+		if($r->batch_no != null)
 		{
-			$po = Purchase::where('title',$r->po_title)->first();
-			if($po == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This purchase order does not exist.']]), 400);
+			$ba = Batch::where('batch_no',$r->batch_no)->first();
+			if($ba == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This batch item does not exist.']]), 400);
 		}
 
 		$rules = array(
@@ -141,18 +142,18 @@ class InventoryController extends Controller
 
 		$psn = $item->serial_no;
 		$ptype = $item->item->title;
-		$ppo = $item->purchase != null ? 'from '.$item->purchase->title : 'new';
+		$ppo = $item->batch != null ? 'from '.$item->batch->purchase->title : 'new';
 
 		$item->serial_no = strtoupper($r->serial_no);
 		$item->item_id = Item::where('title',$r->item_type)->value('id');
-		if($r->po_title != null) $item->purchase_id = $po->id; else $item->purchase_id = null;
+		if($r->batch_no != null) $item->batch_id = $ba->id; else $item->batch_id = null;
 
 		if($item->update())
 		{
 			$this->log(Auth::user()->id,
 				'Updated inventory item serial-no from "'.$psn.'" to "'.$item->serial_no.'", 
 				from "'.$ptype.'" type to "'.$item->item->title.'",
-				and "'.$ppo.'" purchase order to "'.$item->purchase->title.'", 
+				and "'.$ppo.'" purchase order to "'.$item->batch->purchase->title.'", 
 				with id .'.$item->id,
 				$r->path());
 			return response()->json(array('success' => true, 'message' => 'Inventory item updated'), 200);

@@ -74,7 +74,7 @@
 
 								<td><u><a href="{{route('admin.users.show', Crypt::encrypt($item->id))}}" class="c-06f">{{$item->email}}</a></u></td>
 
-								<td>{{$item->username}}</td>
+								<td>{{$item->role != null ? $item->role->title : ''}}</td>
 
 								<td>{!! $item->unit == null ? '<span class="c-999">N/A</span>' : $item->unit->department->title.' <span class="c-999 v-padding-5">/</span> '.$item->unit->title !!}</td>
 
@@ -86,9 +86,13 @@
 
 								<td class="text-right">
 
-									<button class="btn btn-primary btn-sm" title="Edit {{ $item->firstname }}" data-toggle="modal" data-target="#edit-user-modal"><i class="fa fa-pencil"></i></button>
-									<button class="btn btn-primary btn-sm" title="Reset {{ $item->firstname }} password" data-toggle="modal" data-target="#rpass-modal"><i class="fa fa-refresh"></i></button>
-									<button class="btn btn-danger btn-sm" title="Delete {{ $item->firstname }}" data-toggle="modal" data-target="#delete-user-modal" @if(!in_array(Auth::user()->username,$delete_allow)) disabled @endif><i class="fa fa-trash"></i></button>
+									<button class="btn btn-primary btn-sm" title="Edit {{ $item->firstname }}" data-toggle="modal" data-target="#edit-user-modal" @if(!in_array(Auth::user()->username,$edit_allow)) disabled @endif><i class="fa fa-pencil"></i></button>
+									
+									<button class="btn btn-primary btn-sm" title="Reset {{ $item->firstname }} password" data-toggle="modal" data-target="#rpass-modal" @if(!in_array(Auth::user()->username,$edit_allow)) disabled @endif><i class="fa fa-refresh"></i></button>
+
+									@if(in_array(Auth::user()->username,$delete_allow))
+									<button class="btn btn-danger btn-sm" title="Delete {{ $item->firstname }}" data-toggle="modal" data-target="#delete-user-modal"><i class="fa fa-trash"></i></button>
+									@endif
 
 								</td>
 
