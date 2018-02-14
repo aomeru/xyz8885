@@ -56,6 +56,9 @@
 							<dt class="col-4">Comments</dt>
 							<dd class="col-8"><span class="ml5 badge badge-primary font-no-bold">{{ $item->log == null ? 0 : $item->log->count() }}</span></dd>
 
+							<dt class="col-4">Batches</dt>
+							<dd class="col-8"><span class="ml5 badge badge-primary font-no-bold">{{ $item->batches == null ? 0 : $item->batches->count() }}</span></dd>
+
 							<dt class="col-4">Date</dt>
 							<dd class="col-8">{{date('d-m-y, g:ia', strtotime($item->created_at))}}</dd>
 
@@ -76,6 +79,90 @@
 			</div>
 
 			<div class="col-sm-8">
+
+				<div class="card mb20">
+
+					<div class="card-header bgc-333">
+						<h4 class="font-600 text-center no-padding no-margin text-uppercase c-fff">Batches</h4>
+					</div>
+
+
+					<div class="card-block">
+
+						@if(in_array(Auth::user()->username,$create_allow))
+							<div class="mb10">
+								<div class="pull-right">
+									<a href="{{route('admin.po.ba.add', Crypt::encrypt($item->id))}}" class="btn btn-primary btn-sm" title="Add new {{$item->title}} purchase order batch" ><i class="fa fa-plus"></i></a>
+								</div>
+								<div class="clearfix"></div>
+							</div>
+						@endif
+
+						@if(!in_array(Auth::user()->username,$show_allow))
+
+							<p class="alert alert-info">{{ config('app.default_pdm') }}</p>
+
+						@elseif ($item->batches->count() == 0)
+
+							<p class="alert alert-info">There is no batch item for this purchase order.</p>
+
+						@else
+
+							<div class="table-responsive">
+
+								<table class="data-table table table-striped table-borderedd table-hover nowrapp" width="100%" data-page-length="20">
+
+									<thead>
+										<tr class="active">
+											<th>#</th>
+											<th>Batch No</th>
+											<th class="text-center">Inventories</th>
+											<th>Created</th>
+											<th>Modified</th>
+											@if(in_array(Auth::user()->username, $delete_allow)) <th>Action</th> @endif
+										</tr>
+									</thead>
+
+									<tbody>
+
+										@php $row_count = 1 @endphp
+
+										@foreach ($item->batches()->orderby('created_at','desc')->get() as $ba)
+
+											<tr id="row-{{$ba->id}}" data-hrid="{{$ba->id}}" data-id="{{Crypt::encrypt($ba->id)}}" data-btitle="{{$item->title}} purchase order batch: {{$ba->batch_no}}">
+
+												<td>{{ $row_count }}</td>
+												
+												<td><u><a href="{{route('admin.po.ba', Crypt::encrypt($ba->id))}}" class="c-06f">{{$ba->batch_no}}</a></u></td>
+												
+												<td class="text-center">{{ $ba->inventories == null ? 0 : $ba->inventories->count() }}</td>
+
+												<td>{{date('d-m-y, g:ia', strtotime($ba->created_at))}}</td>
+
+												<td>{{date('d-m-y, g:ia', strtotime($ba->updated_at))}}</td>
+
+												@if(in_array(Auth::user()->username, $delete_allow))
+													<td>
+														<button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#delete-ba-modal"><i class="fa fa-trash"></i></button>
+													</td>
+												@endif
+
+											</tr>
+
+											@php $row_count++ @endphp
+
+										@endforeach
+
+									</tbody>
+
+								</table>
+							</div>
+
+						@endif
+
+					</div>
+
+				</div>
 
 				<div class="card">
 
@@ -198,7 +285,8 @@
 			</div>
 		</div>
 	</div>
-	@endif
+@endif
+
 @if(in_array(Auth::user()->username,$delete_allow))
 	<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog w300" role="document">
@@ -227,7 +315,36 @@
 			</div>
 		</div>
 	</div>
-	@endif
+
+	<div class="modal fade" id="delete-ba-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		<div class="modal-dialog w300" role="document">
+			<div class="modal-content">
+
+				<div class="modal-body">
+
+					<p class="text-center font-18x no-bottom-margin">Are you sure you want to delete "<span id="delete-ba-title" class="c-06f"></span>" ?</p>
+
+				</div>
+
+				<div class="modal-footer mh-override">
+					<div class="row">
+						<div class="col-6">
+							<button type="button" class="btn-primary btn btn-block" data-dismiss="modal" aria-label="Close">
+								<i class="fa fa-times mr5"></i>Cancel</button>
+						</div>
+						<div class="col-6">
+							<input type="hidden" id="ba-row-id-delete">
+							<input type="hidden" id="ba-id-delete">
+							<button class="btn-danger btn btn-block" id='delete-ba-btn' type="submit" role="button">
+								<i class="fa fa-trash mr5"></i>Delete</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+@endif
+
 @if(in_array(Auth::user()->username,$edit_allow))
 	<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 		<div class="modal-dialog w450" role="document">
@@ -457,6 +574,52 @@
 						$('#edit-modal').modal('hide');
 						$(load_element).data('comment', comment);
 						$(load_element).load(location.href + " " + load_element + ">*", "");
+					},
+					error: function (jqXHR, exception) {
+						btn.html(btn_text);
+						$('.process-loading-two').toggleClass('add-loading');
+						var error = getErrorMessage(jqXHR, exception);
+						pnotify_alert('error', error);
+					}
+				});
+			});
+
+			$('#delete-ba-modal').on('show.bs.modal', function (e) {
+				var btn = $(e.relatedTarget),
+					tr = btn.closest('tr'),
+					delete_title = tr.data('btitle'),
+					hrid = tr.data('hrid'),
+					ba_id = tr.data('id');
+
+				$("#delete-ba-title").text(delete_title);
+				$("#ba-id-delete").val(ba_id);
+				$("#ba-row-id-delete").val(hrid);
+			});
+
+			$(document).on('click', '#delete-ba-btn', function (e) {
+				e.preventDefault();
+				var btn = $(this),
+					btn_text = btn.html(),
+					ba_id = $('#ba-id-delete').val(),
+					remove_element = '#row-' + $("#ba-row-id-delete").val(),
+					token = '{{ Session::token() }}',
+					url = "{{route('admin.po.ba.delete')}}";
+
+				$.ajax({
+					type: "POST",
+					url: url,
+					data: {
+						ba_id: ba_id,
+						_token: token
+					},
+					beforeSend: function () {
+						btn.html('<i class="fa fa-spinner fa-spin"></i>');
+					},
+					success: function (response) {
+						btn.html(btn_text);
+						$('#delete-ba-modal').modal('hide');
+						pnotify_alert('success', response.message);
+						$(remove_element).remove();
 					},
 					error: function (jqXHR, exception) {
 						btn.html(btn_text);

@@ -19,6 +19,13 @@ trait AclTrait
 			'delete' => ['itsupport','enta'],
 			'show' => ['itsupport','enta'],
 		],
+		'batch' => [
+			'create' => ['itsupport','enta'],
+			'edit' => ['itsupport','enta'],
+			'view' => ['itsupport','enta'],
+			'delete' => ['itsupport','enta'],
+			'show' => ['itsupport','enta'],
+		],
 		'comment' => [
 			'create' => ['itsupport','enta'],
 			'edit' => ['itsupport','enta'],

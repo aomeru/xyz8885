@@ -11,6 +11,7 @@ use App\Traits\AclTrait;
 
 use App\Models\Purchase;
 use App\Models\Plog;
+use App\Models\Batch;
 
 use Session;
 use Auth;
@@ -46,7 +47,13 @@ class PurchaseController extends Controller
 		$this->ledit_allow = $this->acl['plog']['edit'];
 	    $this->lview_allow = $this->acl['plog']['view'];
 	    $this->ldelete_allow = $this->acl['plog']['delete'];
-	    $this->lshow_allow = $this->acl['plog']['show'];
+		$this->lshow_allow = $this->acl['plog']['show'];
+		
+		$this->bcreate_allow = $this->acl['batch']['create'];
+		$this->bedit_allow = $this->acl['batch']['edit'];
+	    $this->bview_allow = $this->acl['batch']['view'];
+	    $this->bdelete_allow = $this->acl['batch']['delete'];
+	    $this->bshow_allow = $this->acl['batch']['show'];
 	}
 
 
@@ -126,7 +133,7 @@ class PurchaseController extends Controller
 			}
 		}
 
-		if($item->save()) { 
+		if($item->save()) {
 			$this->log(Auth::user()->id, 'Added purchase order entry "'.$item->title.'" and id .'.$item->id, $r->path());
 			Session::put('success','Purchase order added');
 			return redirect()->route('admin.po');
@@ -260,7 +267,9 @@ class PurchaseController extends Controller
 
 		if($item == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This purchase order item does not exist']]), 400);
 
-        if($item->plog != null) return response()->json(array('success' => false, 'errors' => ['errors' => ['Please delete '.$item->title.' purchase order log records first']]), 400);
+		if($item->batches->count() > 0) return response()->json(array('success' => false, 'errors' => ['errors' => ['Please delete '.$item->title.' batch records first']]), 400);
+
+		$item->log()->delete();
 
 		$did = $item->id;
 		$ditem = $item->title;
@@ -447,6 +456,116 @@ class PurchaseController extends Controller
 		$item->$option = null;
 
 		if($item->update()){ $this->log(Auth::user()->id, 'Deleted "'.$ditem.'"; with id: '.$did, $r->path()); return response()->json(array('success' => true, 'message' => $title.' file deleted'), 200);}
+
+		return response()->json(array('success' => false, 'errors' => ['errors' => ['Oops, something went wrong please try again']]), 400);
+	}
+
+
+	public function storeBatch($code)
+	{
+		$id = Crypt::decrypt($code);
+		$po = Purchase::find($id);
+
+		if($po == null)
+		{
+			Session::put('error','This Purchase Order item does not exist');
+			return redirect()->route('admin.po');
+		}
+
+		if(!in_array(Auth::user()->username,$this->bcreate_allow))
+        {
+            $this->log(Auth::user()->id, 'RESTRICTED! Tried to create a batch record', Request()->path());
+            $this->ad();
+            return redirect()->back();
+		}
+		
+		$batch_no = $this->generate_code('batch', $col="id", $l=9);
+
+		$item = new Batch();
+		$item->batch_no = $batch_no;
+		$item->purchase_id = $po->id;
+		$item->user_id = Auth::user()->id;
+
+		if($item->save()) {
+			$log = new Plog();
+			$log->purchase_id = $po->id;
+			$log->comment = 'Added new batch record '.$item->batch_no;
+			$log->user_id = Auth::user()->id;
+			$log->save();
+
+			$this->log(Auth::user()->id, 'Added batch record "'.$item->batch_no.'" for "'.$item->purchase->title.'" purchase order with id: '.$item->id, Request()->path());
+			Session::put('success','Batch record added');
+			return redirect()->back();
+		}
+
+		Session::put('error','Oops, an error occured by try again');
+		return redirect()->back();
+	}
+
+
+	public function showBatch($id)
+	{
+
+		if(!in_array(Auth::user()->username,$this->bshow_allow))
+		{
+			$this->log(Auth::user()->id, 'RESTRICTED! Tried to access a purchase order batch page', Request()->path());
+			$this->ad();
+            return redirect()->back();
+		}
+
+
+		$id = Crypt::decrypt($id);
+		$item = Batch::find($id);
+
+		if($item == null)
+		{
+			Session::put('error','This batch item does not exist');
+			return redirect()->back();
+		}
+
+		$this->log(Auth::user()->id, 'Opened the '.$item->batch_no.' batch page.', Request()->path());
+
+        return view('admin.purchase.showBatch', [
+            'item' => $item,
+			'nav' => 'purchase-order',
+            'view_allow' => $this->bview_allow,
+			'show_allow' => $this->bshow_allow,
+        ]);
+
+	}
+
+	
+	public function deleteBatch(Request $r)
+	{
+		$id = Crypt::decrypt($r->ba_id);
+		$item = Batch::find($id);
+
+        if($item == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This batch item does not exist.']]), 400);
+
+		if(!in_array(Auth::user()->username, $this->bdelete_allow))
+		{
+			$this->log(Auth::user()->id, 'RESTRICTED! Tried to delete purchase order batch '.$item->batch_no.' for "'.$item->purchase->title.'".', $r->path());
+			return response()->json(array('success' => false, 'errors' => ['errors' => ['WARNING!!! YOU DO NOT HAVE ACCESS TO CARRY OUT THIS PROCESS']]), 400);
+		}
+
+		if($item->inventories->count() > 0) return response()->json(array('success' => false, 'errors' => ['errors' => ['Please delete '.$item->batch_no.' inventory records first']]), 400);
+
+		$did = $item->id;
+		$dtitle = $item->batch_no.' for '.$item->purchase->title;
+		$po = $item->purchase;
+		$batch_no = $item->batch_no;
+
+		if($item->delete())
+		{
+			$log = new Plog();
+			$log->purchase_id = $po->id;
+			$log->comment = 'Deleted Batch record '.$batch_no;
+			$log->user_id = Auth::user()->id;
+			$log->save();
+			
+			$this->log(Auth::user()->id, 'Deleted "'.$dtitle.'" purchase order batch  record with id .'.$did, $r->path());
+			return response()->json(array('success' => true, 'message' => 'Batch record deleted'), 200);
+		}
 
 		return response()->json(array('success' => false, 'errors' => ['errors' => ['Oops, something went wrong please try again']]), 400);
 	}

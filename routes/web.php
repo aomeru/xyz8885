@@ -219,6 +219,12 @@ Route::group(['prefix' => 'admin', 'middleware' => 'is-admin'], function(){
 
 		Route::post('/log/delete', $con.'deleteLog')->name($rkey.'.delete.log');
 
+		Route::get('/batch/show/{code}', $con.'showBatch')->name($rkey.'.ba');
+
+		Route::get('/batch/add/{code}', $con.'storeBatch')->name($rkey.'.ba.add');
+		
+		Route::post('/batch/delete', $con.'deleteBatch')->name($rkey.'.ba.delete');
+
 	});
 
 

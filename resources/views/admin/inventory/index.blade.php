@@ -108,7 +108,7 @@
 
 							@foreach($invs as $item)
 
-								<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-batch-no="{{$item->purchase == null ? '' : $item->purchase->title}}" data-item-type="{{$item->item->title}}" data-serial-no="{{$item->serial_no}}">
+								<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-batch-no="{{$item->batch == null ? '' : $item->batch->batch_no}}" data-item-type="{{$item->item->title}}" data-serial-no="{{$item->serial_no}}">
 									
 									<td>{{ $row_count }}</td>
 
@@ -118,7 +118,7 @@
 									<td>{{ $item->item->title }}</td>
 									<td>{{ $item->item->type }}</td>
 									<td>{!! $item->item->processor == null ? '<span class="c-999">N/A</span>' : $item->item->processor !!}</td>
-									<td>{!! $item->purchase == null ? '<span class="c-999">Null</span>' : $item->purchase->title !!}</td>
+									<td>{!! $item->batch == null ? '<span class="c-999">Null</span>' : $item->batch->batch_no !!}</td>
 									<td class="text-center">{!!$item->allocation == null ? '<span class="c-f00">No</span>' : '<span class="c-2c5">Yes</span>'!!}</td>
 									@if(in_array(Auth::user()->username,$delete_allow))
 										<td>{{$item->user->firstname.' '.$item->user->lastname}}</td>
@@ -192,7 +192,7 @@
 								<select id="batch-no" class="form-control chzn-select">
 									<option value="">Select Batch Number</option>
 									@foreach($batches as $b)
-										<option value="{{$b->batch_no}}">{{$p->batch_no}}</option>
+										<option value="{{$b->batch_no}}">{{$b->batch_no}}</option>
 									@endforeach
 								</select>
 							</div>
@@ -250,7 +250,7 @@
 								<select id="batch-no-edit" class="form-control chzn-selectt">
 									<option value="">None</option>
 									@foreach($batches as $b)
-										<option value="{{$b->batch_no}}">{{$p->batch_no}}</option>
+										<option value="{{$b->batch_no}}">{{$b->batch_no}}</option>
 									@endforeach
 								</select>
 							</div>
@@ -423,6 +423,7 @@
 			$("#batch-no-edit").val(batch_no);
 			$("#inv-id-edit").val(inv_id);
 			$("#inv-row-id").val(hrid);
+
 
 		});
 

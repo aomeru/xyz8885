@@ -113,7 +113,7 @@
 									
 									<td class="text-center">{!! $item->inv == null ? '<em class="c-999">Null</em>' : '<a href="'.asset('storage/purchase/'.$item->inv).'" title="View '.$item->title.' invoice" target="_blank"><i class="fa fa-2x fa-file-image-o c-900"></i></a>' !!}</td>
 
-									<td>{!! $item->batches == null ? '<em class="c-999">Null</em>' : $item->batches->count() !!}</td>
+									<td class="text-center">{!! $item->batches == null ? '<em class="c-999">Null</em>' : $item->batches->count() !!}</td>
 
 									<td><u><a href="{{route('admin.users.show', Crypt::encrypt($item->user_id))}}" class="c-06f">{{$item->user->firstname.' '.$item->user->lastname}}</a></u></td>
 

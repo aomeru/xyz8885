@@ -7,6 +7,7 @@ use App\Models\Log;
 use App\Models\Page;
 use App\Models\Permission;
 use App\Models\Item;
+use App\Models\Batch;
 
 use Session;
 
@@ -74,6 +75,11 @@ trait CommonTrait
 				$mx = 99999999;
 				break;
 
+			case 9:
+				$mi = 100000000;
+				$mx = 999999999;
+				break;
+
 			case 10:
 				$mi = 1000;
 				$mx = 9999;
@@ -103,6 +109,13 @@ trait CommonTrait
 				do{
 					$val = strtoupper('DH'.rand($mi, $mx).str_random(4));
 					$data = Tlog::where($col, $val)->get();
+				}while(!$data->isEmpty());
+				break;
+
+			case 'batch':
+				do{
+					$val = '#'.rand($mi, $mx);
+					$data = Batch::where($col, $val)->get();
 				}while(!$data->isEmpty());
 				break;
 		}

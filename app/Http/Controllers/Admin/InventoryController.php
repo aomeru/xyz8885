@@ -57,7 +57,7 @@ class InventoryController extends Controller
 		$this->log(Auth::user()->id, 'Opened the items page.', Request()->path());
 
         return view('admin.inventory.index', [
-            'invs' => Inventory::orderby('serial_no')->get(),
+            'invs' => Inventory::orderby('created_at','desc')->get(),
             'items' => Item::orderby('title')->get(),
             'batches' => Batch::orderby('batch_no')->get(),
             'nav' => 'inventory',
@@ -82,7 +82,7 @@ class InventoryController extends Controller
 		if($r->batch_no != null)
 		{
 			$ba = Batch::where('batch_no',$r->batch_no)->first();
-			if($ba == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This batch item does not exist.']]), 400);
+			if($ba == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This batch item does not exist. '.$r->batch_no]]), 400);
 		}
 
 		$rules = array(
@@ -142,7 +142,7 @@ class InventoryController extends Controller
 
 		$psn = $item->serial_no;
 		$ptype = $item->item->title;
-		$ppo = $item->batch != null ? 'from '.$item->batch->purchase->title : 'new';
+		$ppo = $item->batch != null ? 'and from '.$item->batch->batch_no.' batch' : 'new batch';
 
 		$item->serial_no = strtoupper($r->serial_no);
 		$item->item_id = Item::where('title',$r->item_type)->value('id');
@@ -150,11 +150,10 @@ class InventoryController extends Controller
 
 		if($item->update())
 		{
+			//$ppo .= $item->batch == null ? '' : 'to '.$item->batch->batch_no.' batch';
 			$this->log(Auth::user()->id,
 				'Updated inventory item serial-no from "'.$psn.'" to "'.$item->serial_no.'", 
-				from "'.$ptype.'" type to "'.$item->item->title.'",
-				and "'.$ppo.'" purchase order to "'.$item->batch->purchase->title.'", 
-				with id .'.$item->id,
+				from "'.$ptype.'" type to "'.$item->item->title.'"'.$ppo.', with id: '.$item->id,
 				$r->path());
 			return response()->json(array('success' => true, 'message' => 'Inventory item updated'), 200);
 		}
@@ -177,6 +176,8 @@ class InventoryController extends Controller
 		if($item == null) return response()->json(array('success' => false, 'errors' => ['errors' => ['This item was not found in our inventory.']]), 400);
 
         if($item->allocation != null) return response()->json(array('success' => false, 'errors' => ['errors' => ['Please delete inventory allocation first']]), 400);
+		
+		if($item->log->count() > 0) return response()->json(array('success' => false, 'errors' => ['errors' => ['Please delete inventory logs first']]), 400);
 
 		$did = $item->id;
 		$dsn = $item->serial_no;
