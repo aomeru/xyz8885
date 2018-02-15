@@ -9,5 +9,4 @@
 /resources/views/_backup
 Homestead.json
 Homestead.yaml
-.env
 /deploy

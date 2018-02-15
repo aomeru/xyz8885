@@ -1,6 +1,6 @@
 <?php
 
-$lifetime = env('APP_ENV') == 'local' ? 120 : 10;
+$lifetime = env('APP_ENV') == 'local' ? 120 : 30;
 
 return [
 

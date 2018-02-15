@@ -43,7 +43,7 @@
 							</div>
 						</div>
 
-						<table id="sample_1" class="data-table table table-striped table-bordered table-hover nowrap" width="100%" data-page-length="10">
+						<table id="sample_1" class="data-table table table-striped table-bordered table-hover nowrap" width="100%" data-page-length="50">
 
 							<thead>
 								<tr class="active">

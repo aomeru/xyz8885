@@ -62,7 +62,7 @@
 
 						@foreach($list as $item)
 
-							<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-firstname="{{$item->firstname}}" data-lastname="{{$item->lastname}}" data-staff-id="{{$item->staff_id}}" data-role-id="{{$item->username}}" data-unit-id="{{$item->unit == null ? '' : $item->unit->title}}" data-gender="{{$item->gender}}" data-email="{{$item->email}}" data-status="{{$item->status}}">
+							<tr id="row-{{$item->id}}" data-hrid="{{$item->id}}" data-id="{{Crypt::encrypt($item->id)}}" data-firstname="{{$item->firstname}}" data-lastname="{{$item->lastname}}" data-staff-id="{{$item->staff_id}}" data-role="{{$item->role->title}}" data-unit-id="{{$item->unit == null ? '' : $item->unit->title}}" data-gender="{{$item->gender}}" data-email="{{$item->email}}" data-status="{{$item->status}}">
 
 								<td>{{ $row_count }}</td>
 
@@ -508,7 +508,7 @@
 				firstname = tr.data('firstname'),
 				lastname = tr.data('lastname'),
 				staff_id = tr.data('staff-id'),
-				role_id = tr.data('role-id'),
+				role_id = tr.data('role'),
 				unit_id = tr.data('unit-id'),
 				email = tr.data('email'),
 				gender = tr.data('gender'),
